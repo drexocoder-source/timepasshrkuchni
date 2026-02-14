@@ -15,12 +15,12 @@
       "API_ID": {
          "description": "Get this value from my.telegram.org/apps.",
          "required": true,
-         "value": "22733269"
+         "value": "35064036"
       },
       "API_HASH": {
          "description": "Get this value from my.telegram.org/apps.",
          "required": true,
-         "value": "d1d8331e5b288c572e8bb6baa7d8f833"
+         "value": "c9a901b08789b91eae4097ba2dcc086c"
       },
       "ALLOW_EXCL": {
          "description": "Set this to True if you want ! to be a command prefix along with /. Recommended is True",
@@ -73,7 +73,7 @@
       "TOKEN": {
          "description": "Get bot token from @BotFather on TG",
          "required": true,
-         "value": "8199691974:AAGpT3NihuvnFYj9xJ3dcXb_cF2vfpfGDpY"
+         "value": "8060047936:AAGj1Hl1Xs7HcwShGc-G-2HUblG8rKyD96o"
       }
    }
 }
