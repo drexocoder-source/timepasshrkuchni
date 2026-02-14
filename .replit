@@ -1,0 +1,35 @@
+modules = ["python-3.10"]
+[agent]
+expertMode = true
+
+[nix]
+channel = "stable-25_05"
+packages = ["ffmpeg", "libffi", "zlib"]
+
+[userenv]
+
+[userenv.shared]
+ENV = "True"
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "DazaiRobot"
+
+[[workflows.workflow]]
+name = "DazaiRobot"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python -m DazaiRobot"
+
+[workflows.workflow.metadata]
+outputType = "console"
