@@ -5,6 +5,7 @@ STATUS: Code is working. ✅
 from pyrogram import filters
 import requests
 from DazaiRobot import pbot
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 @pbot.on_message(filters.command('latest'))
 def schedule(_, message):

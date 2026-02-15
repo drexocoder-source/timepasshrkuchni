@@ -6,6 +6,7 @@ import time
 
 from telegram import Update
 from telegram.ext import CallbackContext
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from DazaiRobot import dispatcher
 from DazaiRobot.modules.disable import DisableAbleCommandHandler

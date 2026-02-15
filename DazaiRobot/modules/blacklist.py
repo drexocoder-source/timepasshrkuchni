@@ -1,5 +1,6 @@
 import html
 import re
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram import ChatPermissions, ParseMode
 from telegram.error import BadRequest

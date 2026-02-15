@@ -8,10 +8,7 @@ from pyrogram import filters
 from pyrogram.types import *
 from DazaiRobot import pbot as  Hiroko
 
-
-
-
-aiohttpsession = ClientSession()
+from DazaiRobot import aiohttpsession
 
 
 async def post(url: str, *args, **kwargs):

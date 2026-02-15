@@ -5,6 +5,8 @@ from telegram import ParseMode, Update
 from telegram.error import BadRequest
 from telegram.ext import CallbackContext, CommandHandler
 from telegram.utils.helpers import mention_html
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton
+
 
 from DazaiRobot import DRAGONS, dispatcher
 from DazaiRobot.modules.disable import DisableAbleCommandHandler

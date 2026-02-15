@@ -1,6 +1,7 @@
 import datetime
 import html
 import textwrap
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 import bs4
 import jikanpy

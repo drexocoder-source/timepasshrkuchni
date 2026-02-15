@@ -1,0 +1,75 @@
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+284 info userinfo.py
+> mod_info = mod.__user_info__(user.id).strip()
+
+---
+
+487 __user_info__ global_bans.py
+> if int(user_id) in DRAGONS + TIGERS + WOLVES:
+
+TypeError:
+unsupported operand type(s) for +: 'set' and 'set'
+
+---------------------------------------------------------------------------------------------------------------------------------------------------
+569 process_update dispatcher.py
+> self.dispatch_error(update, exc)
+
+---
+
+813 dispatch_error dispatcher.py
+> callback(update, context)
+
+---
+
+479 error_callback __main__.py
+> raise error
+
+---
+
+557 process_update dispatcher.py
+> handler.handle_update(update, self, check, context)
+
+---
+
+116 handle_update handlers.py
+> return self.callback(update, context)
+
+---
+
+286 info userinfo.py
+> mod_info = mod.__user_info__(user.id, chat.id).strip()
+
+TypeError:
+__user_info__() takes 1 positional argument but 2 were given
+
+-------------------------------------------------------------------------------
+An exception was raised while handling an update
+User: 8294062042
+Chat: Nex -1003692127639
+Callback data: None
+Message: /info
+
+Full Traceback: Traceback (most recent call last):
+  File "/home/runner/workspace/DazaiRobot/modules/userinfo.py", line 284, in info
+    mod_info = mod.__user_info__(user.id).strip()
+  File "/home/runner/workspace/DazaiRobot/modules/global_bans.py", line 487, in __user_info__
+    if int(user_id) in DRAGONS + TIGERS + WOLVES:
+TypeError: unsupported operand type(s) for +: 'set' and 'set'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 569, in process_update
+    self.dispatch_error(update, exc)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 813, in dispatch_error
+    callback(update, context)
+  File "/home/runner/workspace/DazaiRobot/__main__.py", line 479, in error_callback
+    raise error
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 557, in process_update
+    handler.handle_update(update, self, check, context)
+  File "/home/runner/workspace/DazaiRobot/modules/helper_funcs/handlers.py", line 116, in handle_update
+    return self.callback(update, context)
+  File "/home/runner/workspace/DazaiRobot/modules/userinfo.py", line 286, in info
+    mod_info = mod.__user_info__(user.id, chat.id).strip()
+TypeError: __user_info__() takes 1 positional argument but 2 were given

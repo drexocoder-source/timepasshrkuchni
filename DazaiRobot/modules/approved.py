@@ -3,6 +3,7 @@ from DazaiRobot import pbot as Michiko
 from pyrogram import filters
 from pyrogram.types import ChatJoinRequest
 from pyrogram.errors import FloodWait
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 @Michiko.on_chat_join_request(filters.group | filters.channel)
 async def approve(_, m: ChatJoinRequest):

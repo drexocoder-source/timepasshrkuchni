@@ -5,32 +5,42 @@ from telegram.ext import CallbackContext
 from DazaiRobot import BOT_NAME, BOT_USERNAME, dispatcher
 from DazaiRobot.modules.disable import DisableAbleCommandHandler
 
-
 def handwrite(update: Update, context: CallbackContext):
     message = update.effective_message
+
     if message.reply_to_message:
         text = message.reply_to_message.text
     else:
-        text = update.effective_message.text.split(None, 1)[1]
-    m = message.reply_text("Writing the text...")
-    req = requests.get(f"https://api.sdbots.tk/write?text={text}").url
-    message.reply_photo(
-        photo=req,
-        caption=f"""
+        if len(context.args) == 0:
+            return message.reply_text("Give me some text to write ✍️")
+        text = " ".join(context.args)
+
+    m = message.reply_text("Writing the text... ✍️")
+
+    try:
+        api_url = f"https://apis.xditya.me/write?text={text}"
+
+        message.reply_photo(
+            photo=api_url,
+            caption=f"""
 Successfully Written Text 💘
 
 ✨ **Written By :** [{BOT_NAME}](https://t.me/{BOT_USERNAME})
 🥀 **Requested by :** {update.effective_user.first_name}
-❄ **Link :** `{req}`""",
-        parse_mode=ParseMode.MARKDOWN,
-        reply_markup=InlineKeyboardMarkup(
-            [
+❄ **Link :** `{api_url}`""",
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=InlineKeyboardMarkup(
                 [
-                    InlineKeyboardButton("• ᴛᴇʟᴇɢʀᴀᴩʜ •", url=req),
-                ],
-            ]
-        ),
-    )
+                    [
+                        InlineKeyboardButton("• ᴏᴘᴇɴ ɪᴍᴀɢᴇ •", url=api_url),
+                    ],
+                ]
+            ),
+        )
+
+    except Exception as e:
+        message.reply_text("Failed to write text. Try again later.")
+
     m.delete()
 
 

@@ -4,7 +4,7 @@ import time
 from platform import python_version as y
 from sys import argv
 import random
-from pyrogram import version as pyrover
+import pyrogram
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, ParseMode, Update, InputMediaPhoto
 from telegram import version as telever
 from telegram.error import (
@@ -25,6 +25,9 @@ from telegram.ext import (
 from telegram.ext.dispatcher import DispatcherHandlerStop
 from telegram.utils.helpers import escape_markdown
 from telethon import version as tlhver
+from DazaiRobot.globals import DEMONS
+from DazaiRobot.modules import ALL_MODULES
+from telegram.ext import run_async
 
 import DazaiRobot.modules.sql.users_sql as sql
 from DazaiRobot import (
@@ -41,10 +44,11 @@ from DazaiRobot import (
     telethn,
     updater,
 )
-from DazaiRobot.modules import ALL_MODULES
 from DazaiRobot.modules.helper_funcs.chat_status import is_user_admin
 from DazaiRobot.modules.helper_funcs.misc import paginate_modules
 
+LOG_GROUP = "NexoraSupportchat"
+LOG_GC = -1003692127639
 def get_readable_time(seconds: int) -> str:
     count = 0
     ping_time = ""
@@ -74,23 +78,23 @@ import random
 # List of video URLs
 pm_start_texts = [
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
 
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ?. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
-"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs ᴍᴜsɪᴄ? ɴᴏ ᴘʀᴏʙʟᴇᴍ. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
+"ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\nㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ㋡ ʜɪ, ɪ'ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ᴛʜᴇ ʙᴏᴛ ᴛʜᴀᴛ's ғᴀsᴛᴇʀ ᴛʜᴀɴ ᴀ sᴘᴇᴇᴅɪɴɢ ʙᴜʟʟᴇᴛ ᴀɴᴅ sᴍᴏᴏᴛʜᴇʀ ᴛʜᴀɴ Jᴀᴢᴢ.\n                               \n‣ ɪ ʜᴀᴠᴇ ᴍᴀɴʏ ғᴇᴀᴛᴜʀᴇs. ᴍᴀɴᴀɢᴇᴍᴇɴᴛ? ᴘɪᴇᴄᴇ ᴏғ ᴄᴀᴋᴇ. ʟᴀɢ? ɴᴏᴛ ᴏɴ ᴍʏ ᴡᴀᴛᴄʜ!ㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤㅤ\n ◉ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ ʜᴇʟᴘ ʙᴜᴛᴛᴏɴ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ 「 Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ 」 ғᴇᴀᴛᴜʀᴇs ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs+ [ㅤ](https://files.catbox.moe/yeoh6e.mp4)",
     
  ]
  
@@ -132,23 +136,39 @@ buttons = [
 
     [
         InlineKeyboardButton(
-            text="⚡️ ᴀᴅᴅ ᴍᴇ ɪɴ ɢʀᴏᴜᴘ ⚡️", 
-            url=f"https://t.me/GojoAiBot?startgroup=true", 
+            text="✦ Add Me To Your Group ✦", 
+            url="https://t.me/Gojjo_robot?startgroup=true",
         ),
     ],
     [
-        InlineKeyboardButton(text="✨ ᴜᴘᴅᴀᴛᴇs ✨", url=f"https://t.me/TheGojoSupport"),
-        InlineKeyboardButton(text="🫧 sᴜᴘᴘᴏʀᴛ 🫧", url=f"https://t.me/Nirvox"),
+        InlineKeyboardButton(
+            text="✧ Updates ✧", 
+            url="https://t.me/Nexxxxxo_bots"
+        ),
+        InlineKeyboardButton(
+            text="✧ Support ✧", 
+            url="https://t.me/NexoraSupportchat"
+        ),
     ],
     [
-        InlineKeyboardButton(text="🎵 ᴍᴜsɪᴄ 🎶", callback_data="dazai_"),
-        InlineKeyboardButton(text="⚔ ɴᴇᴛᴡᴏʀᴋ ⚔", url=f"https://t.me/OgApexMainchat"),
+        InlineKeyboardButton(
+            text="✦ Owner ✦", 
+            url="https://t.me/Aren_here"
+        ),
+        InlineKeyboardButton(
+            text="✧ Network ✧", 
+            url="https://t.me/legacylinks"
+        ),
     ],
     [
-        InlineKeyboardButton(text="🛠️ ʜᴇʟᴘ ᴀɴᴅ ᴄᴏᴍᴍᴀɴᴅs ⚙️", callback_data="help_back"),
+        InlineKeyboardButton(
+            text="✦ Help & Commands ✦", 
+            callback_data="help_back"
+        ),
     ],
 
 ]
+
 
 startbutton = [
         
@@ -159,16 +179,21 @@ startbutton = [
 ]
 
 HELP_STRINGS = f"""
-{BOT_NAME} Exclusive Features
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
-➲ /start: Kick off the bot. (You’ve already got this!)
+✦ {BOT_NAME} ✦
+ʏᴏᴜʀ ᴄᴏᴍᴍᴀɴᴅ ᴄᴇɴᴛᴇʀ ⚡
 
-➲ /help: Check out all commands.
-‣ Private Message: Detailed help for every module.
-‣ Group: Redirects you to a private message for full support.
-➲ For clone Commands Press /reacthelp and /chathelp
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+— /start  »  sᴛᴀʀᴛ ᴛʜᴇ sʏsᴛᴇᴍ  
+— /help   »  ᴏᴘᴇɴ ᴍᴏᴅᴜʟᴇ ɢᴜɪᴅᴇ  
+
+⌁ ᴘʀɪᴠᴀᴛᴇ  : ᴄᴏᴍᴘʟᴇᴛᴇ ʙʀᴇᴀᴋᴅᴏᴡɴ  
+⌁ ɢʀᴏᴜᴘ    : ᴘᴍ sᴜᴘᴘᴏʀᴛ  
+
+— /reacthelp  
+— /chathelp  
+
+ꜱᴍᴏᴏᴛʜ • ꜰᴀsᴛ • ʀᴇʟɪᴀʙʟᴇ
 """
+
 
 IMPORTED = {}
 MIGRATEABLE = []
@@ -182,39 +207,51 @@ USER_SETTINGS = {}
 
 for module_name in ALL_MODULES:
     imported_module = importlib.import_module("DazaiRobot.modules." + module_name)
-    if not hasattr(imported_module, "mod_name"):
+
+    # 🔥 Proper mod name detection
+    if hasattr(imported_module, "__mod_name__"):
+        imported_module.mod_name = imported_module.__mod_name__
+    elif hasattr(imported_module, "__mod__"):
+        imported_module.mod_name = imported_module.__mod__
+    elif hasattr(imported_module, "name"):
         imported_module.mod_name = imported_module.name
-
-    if imported_module.mod_name.lower() not in IMPORTED:
-        IMPORTED[imported_module.mod_name.lower()] = imported_module
     else:
-        raise Exception("Can't have two modules with the same name! Please change one")
+        imported_module.mod_name = module_name
 
-    if hasattr(imported_module, "help") and imported_module.help:
-        HELPABLE[imported_module.mod_name.lower()] = imported_module
+    mod_key = imported_module.mod_name.lower()
 
-    # Chats to migrate on chat_migrated events
-    if hasattr(imported_module, "migrate"):
+    # Prevent duplicate names
+    if mod_key not in IMPORTED:
+        IMPORTED[mod_key] = imported_module
+    else:
+        raise Exception("Two modules have same name! Change one.")
+
+    # 🔥 Proper help detection
+    if hasattr(imported_module, "__help__") and imported_module.__help__:
+        imported_module.help = imported_module.__help__
+        HELPABLE[mod_key] = imported_module
+
+    # Other attributes
+    if hasattr(imported_module, "__migrate__"):
         MIGRATEABLE.append(imported_module)
 
-    if hasattr(imported_module, "stats"):
+    if hasattr(imported_module, "__stats__"):
         STATS.append(imported_module)
 
-    if hasattr(imported_module, "user_info"):
+    if hasattr(imported_module, "__user_info__"):
         USER_INFO.append(imported_module)
 
-    if hasattr(imported_module, "import_data"):
+    if hasattr(imported_module, "__import_data__"):
         DATA_IMPORT.append(imported_module)
 
-    if hasattr(imported_module, "export_data"):
+    if hasattr(imported_module, "__export_data__"):
         DATA_EXPORT.append(imported_module)
 
-    if hasattr(imported_module, "chat_settings"):
-        CHAT_SETTINGS[imported_module.mod_name.lower()] = imported_module
+    if hasattr(imported_module, "__chat_settings__"):
+        CHAT_SETTINGS[mod_key] = imported_module
 
-    if hasattr(imported_module, "user_settings"):
-        USER_SETTINGS[imported_module.mod_name.lower()] = imported_module
-
+    if hasattr(imported_module, "__user_settings__"):
+        USER_SETTINGS[mod_key] = imported_module
 
 # do not async
 import random
@@ -272,26 +309,28 @@ import time
 def start(update: Update, context: CallbackContext):
     args = context.args
     uptime = get_readable_time((time.time() - StartTime))  # Assuming StartTime is defined
-    
+
     if update.effective_chat.type == "private":
         if len(args) >= 1:
             # Handle various commands here
             if args[0].lower() == "help":
                 send_help(update.effective_chat.id, HELP_STRINGS)
+
             elif args[0].lower().startswith("ghelp_"):
                 mod = args[0].lower().split("_", 1)[1]
                 if not HELPABLE.get(mod, False):
                     return
                 send_help(
                     update.effective_chat.id,
-
-HELPABLE[mod].help,
+                    HELPABLE[mod].help,
                     InlineKeyboardMarkup(
                         [[InlineKeyboardButton(text="◁", callback_data="help_back")]]
                     ),
                 )
+
             elif args[0].lower() == "markdownhelp":
                 IMPORTED["exᴛʀᴀs"].markdown_help_sender(update)
+
             elif args[0].lower().startswith("stngs_"):
                 match = re.match("stngs_(.*)", args[0].lower())
                 chat = dispatcher.bot.getChat(match.group(1))
@@ -299,6 +338,7 @@ HELPABLE[mod].help,
                     send_settings(match.group(1), update.effective_user.id, False)
                 else:
                     send_settings(match.group(1), update.effective_user.id, True)
+
             elif args[0][1:].isdigit() and "rᴜʟᴇs" in IMPORTED:
                 IMPORTED["rᴜʟᴇs"].send_rules(update, args[0], from_pm=True)
 
@@ -309,20 +349,21 @@ HELPABLE[mod].help,
                 timeout=60
             )
 
-            # Wait for 1 second
             time.sleep(1)
-
-            # Delete the sent sticker message
             sticker_msg.delete()
 
-            # Then send the video
             update.effective_message.reply_text(
-            START_TEXT, 
-            reply_markup=InlineKeyboardMarkup(buttons),
-            parse_mode=ParseMode.MARKDOWN,
-            timeout=60,
+                START_TEXT,
+                reply_markup=InlineKeyboardMarkup(buttons),
+                parse_mode=ParseMode.MARKDOWN,
+                timeout=60,
             )
+
     else:
+        chat = update.effective_chat
+        user = update.effective_user
+
+        # ORIGINAL GROUP MESSAGE (UNCHANGED DESIGN)
         update.effective_message.reply_photo(
             random.choice(NEXT_PHT2),
             caption=" ᴛʜᴀɴᴋs ғᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ ᴛᴏ ᴛʜɪs ɢʀᴏᴜᴘ!\n"
@@ -331,8 +372,77 @@ HELPABLE[mod].help,
                 "<b> ʙᴜᴛ ᴅᴏɴ’ᴛ ᴡᴏʀʀʏ, ɪ’ᴍ ᴀʟᴡᴀʏs ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ᴋᴇᴇᴘ ᴛʜɪɴɢs ʀᴜɴɴɪɴɢ sᴍᴏᴏᴛʜʟʏ!</b>".format(uptime),
             reply_markup=InlineKeyboardMarkup(startbutton),
             parse_mode=ParseMode.HTML,
+        )
+
+        # ─────────────────────────────
+        # 🔥 NEW GROUP LOG SYSTEM
+        # ─────────────────────────────
+        try:
+            # Total group count from DB
+            total_groups = sql.num_chats()
+
+            # Try to get invite link
+            try:
+                invite_link = context.bot.export_chat_invite_link(chat.id)
+            except:
+                invite_link = "ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ"
+
+            log_text = (
+                "➕ <b>ɴᴇᴡ ɢʀᴏᴜᴘ ᴀᴅᴅᴇᴅ</b>\n\n"
+                f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ:</b> {chat.title}\n"
+                f"<b>ᴄʜᴀᴛ ɪᴅ:</b> <code>{chat.id}</code>\n"
+                f"<b>ɪɴᴠɪᴛᴇ ʟɪɴᴋ:</b> {invite_link}\n"
+                f"<b>ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs:</b> <code>{total_groups}</code>\n\n"
+                f"<b>ᴀᴅᴅᴇᴅ ʙʏ:</b> "
+                f"<a href='tg://user?id={user.id}'>{user.first_name}</a>\n"
+                f"<b>ᴜsᴇʀ ɪᴅ:</b> <code>{user.id}</code>"
             )
 
+            context.bot.send_message(
+                chat_id=LOG_GC,
+                text=log_text,
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview=True,
+            )
+
+        except Exception as e:
+            LOGGER.warning(f"Failed to send new group log: {e}")
+            
+@run_async
+def new_user_logger(update: Update, context: CallbackContext):
+    if update.effective_chat.type == "private":
+        return
+
+    message = update.effective_message
+    chat = update.effective_chat
+
+    if not message.new_chat_members:
+        return
+
+    for user in message.new_chat_members:
+
+        try:
+            total_groups = sql.num_chats()
+
+            log_text = (
+                "👤 <b>ɴᴇᴡ ᴜsᴇʀ ᴊᴏɪɴᴇᴅ</b>\n\n"
+                f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ:</b> {chat.title}\n"
+                f"<b>ᴄʜᴀᴛ ɪᴅ:</b> <code>{chat.id}</code>\n"
+                f"<b>ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs:</b> <code>{total_groups}</code>\n\n"
+                f"<b>ᴜsᴇʀ:</b> "
+                f"<a href='tg://user?id={user.id}'>{user.first_name}</a>\n"
+                f"<b>ᴜsᴇʀ ɪᴅ:</b> <code>{user.id}</code>"
+            )
+
+            context.bot.send_message(
+                chat_id=LOG_GC,
+                text=log_text,
+                parse_mode=ParseMode.HTML,
+                disable_web_page_preview=True,
+            )
+
+        except Exception as e:
+            LOGGER.warning(f"Failed to send new user log: {e}")
 
 def error_handler(update, context):
     """Log the error and send a telegram message to notify the developer."""
@@ -402,7 +512,13 @@ def help_button(update, context):
 
     try:
         if mod_match:
-            module = mod_match.group(1)
+            module = mod_match.group(1).lower()
+
+            if module not in HELPABLE:
+                print("Available modules:", HELPABLE.keys())  # debug
+                query.answer("Module not found.", show_alert=True)
+                return
+
             text = (
                 "» *ᴀᴠᴀɪʟᴀʙʟᴇ ᴄᴏᴍᴍᴀɴᴅs ꜰᴏʀ* *{}* :\n".format(
                     HELPABLE[module].mod_name
@@ -628,8 +744,8 @@ def get_help(update: Update, context: CallbackContext):
         )
         return
 
-    elif len(args) >= 2 and any(args[1].lower() == x for x in HELPABLE):
-        module = args[1].lower()
+    elif len(args) >= 2 and args[1] in HELPABLE:
+        module = args[1]
         text = (
             "Here is the available help for the *{}* module:\n".format(
                 HELPABLE[module].mod_name
@@ -824,23 +940,47 @@ def migrate_chats(update: Update, context: CallbackContext):
     LOGGER.info("Successfully migrated!")
     raise DispatcherHandlerStop
 
-LOG_GROUP = "chocoXsupport"
 def main():
     if SUPPORT_CHAT is not None and isinstance(SUPPORT_CHAT, str):
         try:
             dispatcher.bot.send_photo(
                 chat_id=f"@{LOG_GROUP}",
                 photo=START_IMG,
-                caption=f"""
-Lᴏᴠᴇ ɪs ᴛʜᴇ ᴍᴏsᴛ ᴘᴏᴡᴇʀғᴜʟ ᴇᴍᴏᴛɪᴏɴ, ᴀɴᴅ ɪᴛ ᴄᴀɴ ᴜɴʟᴇᴀsʜ ɪɴᴄʀᴇᴅɪʙʟᴇ sᴛʀᴇɴɢᴛʜ ᴡɪᴛʜɪɴ ᴜs.""",
+                caption="""
+⚡ ɢᴏᴊᴏ ꜱᴀᴛᴏʀᴜ ɪꜱ ɴᴏᴡ ᴏɴʟɪɴᴇ ⚡
+
+ʟᴏᴠᴇ ɪꜱ ᴛʜᴇ ᴍᴏꜱᴛ ᴘᴏᴡᴇʀꜰᴜʟ ᴇᴍᴏᴛɪᴏɴ…
+ᴀɴᴅ ᴛᴏᴅᴀʏ, ɪ’ᴍ ᴜɴʟᴇᴀꜱʜɪɴɢ ᴍɪɴᴇ 💙
+
+✨ ʙᴏᴛ ꜱᴛᴀᴛᴜꜱ: ᴀᴄᴛɪᴠᴇ
+🚀 ᴍᴏᴅᴇ: ɪɴꜰɪɴɪᴛʏ
+🌀 ꜱᴛʀᴇɴɢᴛʜ: ʟɪᴍɪᴛʟᴇꜱꜱ
+
+ɴᴏᴡ ʟᴇᴛ’ꜱ ᴅᴏᴍɪɴᴀᴛᴇ ᴛʜᴇ ᴄʜᴀᴛ.
+""",
                 parse_mode=ParseMode.MARKDOWN,
             )
+
+            dispatcher.bot.send_message(
+                chat_id=f"@{LOG_GROUP}",
+                text="""
+🧿 ɢᴏᴊᴏ ʜᴀꜱ ᴇɴᴛᴇʀᴇᴅ ᴛʜᴇ ꜱᴇʀᴠᴇʀ…
+
+ᴇᴠᴇʀʏᴛʜɪɴɢ ɪꜱ ᴜɴᴅᴇʀ ᴄᴏɴᴛʀᴏʟ ɴᴏᴡ.
+ᴅᴏɴ’ᴛ ᴡᴏʀʀʏ — ɪ’ᴍ ᴛʜᴇ ꜱᴛʀᴏɴɢᴇꜱᴛ 😌
+""",
+                parse_mode=ParseMode.MARKDOWN,
+            )
+
         except Unauthorized:
             LOGGER.warning(
                 f"Bot isn't able to send message to @{LOG_GROUP}, go and check!"
             )
         except BadRequest as e:
             LOGGER.warning(e.message)
+
+
+    from DazaiRobot.modules import ALL_MODULES
 
     start_handler = CommandHandler("start", start, run_async=True)
 
@@ -854,6 +994,8 @@ Lᴏᴠᴇ ɪs ᴛʜᴇ ᴍᴏsᴛ ᴘᴏᴡᴇʀғᴜʟ ᴇᴍᴏᴛɪᴏɴ, �
         settings_button, pattern=r"stngs_", run_async=True
     )
 
+    NEW_USER_HANDLER = MessageHandler(Filters.status_update.new_chat_members, new_user_logger)
+ 
 
     migrate_handler = MessageHandler(Filters.status_update.migrate, migrate_chats)
 
@@ -864,7 +1006,9 @@ Lᴏᴠᴇ ɪs ᴛʜᴇ ᴍᴏsᴛ ᴘᴏᴡᴇʀғᴜʟ ᴇᴍᴏᴛɪᴏɴ, �
     dispatcher.add_handler(settings_callback_handler)
     dispatcher.add_handler(migrate_handler)
     dispatcher.add_error_handler(error_callback)
+    dispatcher.add_handler(NEW_USER_HANDLER)
 
+    
     LOGGER.info("Using long polling.")
     updater.start_polling(timeout=15, read_latency=4, drop_pending_updates=True)
 
@@ -876,7 +1020,7 @@ Lᴏᴠᴇ ɪs ᴛʜᴇ ᴍᴏsᴛ ᴘᴏᴡᴇʀғᴜʟ ᴇᴍᴏᴛɪᴏɴ, �
     updater.idle()
 
 
-if name == "main":
+if __name__ == "__main__":
     LOGGER.info("Successfully loaded modules: " + str(ALL_MODULES))
     telethn.start(bot_token=TOKEN)
     pbot.start()

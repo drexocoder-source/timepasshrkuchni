@@ -1,5 +1,6 @@
 import html
 import random
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram import MessageEntity, Update
 from telegram.error import BadRequest

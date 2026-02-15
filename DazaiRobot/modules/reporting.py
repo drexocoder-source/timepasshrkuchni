@@ -17,7 +17,7 @@ from DazaiRobot.modules.log_channel import loggable
 from DazaiRobot.modules.sql import reporting_sql as sql
 
 REPORT_GROUP = 12
-REPORT_IMMUNE_USERS = DRAGONS + TIGERS + WOLVES
+REPORT_IMMUNE_USERS = DRAGONS | TIGERS | WOLVES
 
 
 @user_admin

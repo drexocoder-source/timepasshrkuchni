@@ -1,4 +1,5 @@
 import html
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram import ParseMode, Update
 from telegram.error import BadRequest

@@ -1,4 +1,5 @@
 import html
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram import ParseMode, Update
 from telegram.error import BadRequest
@@ -14,8 +15,15 @@ from DazaiRobot.modules.helper_funcs.extraction import (
 )
 from DazaiRobot.modules.log_channel import gloggable
 
-BLACKLISTWHITELIST = [OWNER_ID] + DEV_USERS + DRAGONS + WOLVES + DEMONS
-BLABLEUSERS = [OWNER_ID] + DEV_USERS
+BLACKLISTWHITELIST = (
+    [OWNER_ID]
+    + list(DEV_USERS)
+    + list(DRAGONS)
+    + list(WOLVES)
+    + list(DEMONS)
+)
+
+BLABLEUSERS = [OWNER_ID] + list(DEV_USERS)
 
 
 @dev_plus

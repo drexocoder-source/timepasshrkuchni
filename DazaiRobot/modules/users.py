@@ -18,7 +18,9 @@ from DazaiRobot.modules.sql.users_sql import get_all_users
 
 USERS_GROUP = 4
 CHAT_GROUP = 5
-DEV_AND_MORE = DEV_USERS.append(int(OWNER_ID))
+DEV_USERS.add(int(OWNER_ID))
+DEV_AND_MORE = list(DEV_USERS)
+
 
 
 def get_user_id(username):

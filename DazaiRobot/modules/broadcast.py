@@ -6,6 +6,7 @@
 import asyncio
 from pyrogram import Client, filters
 from pyrogram.types import Message
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 #DazaiRobot => Your Bots File Name
 import DazaiRobot.modules.sql.users_sql as sql

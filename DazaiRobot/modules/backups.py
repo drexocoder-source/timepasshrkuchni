@@ -2,6 +2,7 @@ import json
 import os
 import time
 from io import BytesIO
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 from telegram import ParseMode
 from telegram.error import BadRequest

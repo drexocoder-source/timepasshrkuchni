@@ -122,7 +122,6 @@ def sed(update: Update, context: CallbackContext):
         elif text:
             update.effective_message.reply_to_message.reply_text(text)
 
-
 __mod_name__ = "Sed/Regex"
 
 SED_HANDLER = DisableAbleMessageHandler(
