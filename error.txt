@@ -1,75 +1,88 @@
 
 ---------------------------------------------------------------------------------------------------------------------------------------------------
-284 info userinfo.py
-> mod_info = mod.__user_info__(user.id).strip()
-
----
-
-487 __user_info__ global_bans.py
-> if int(user_id) in DRAGONS + TIGERS + WOLVES:
-
-TypeError:
-unsupported operand type(s) for +: 'set' and 'set'
-
----------------------------------------------------------------------------------------------------------------------------------------------------
-569 process_update dispatcher.py
-> self.dispatch_error(update, exc)
-
----
-
-813 dispatch_error dispatcher.py
-> callback(update, context)
-
----
-
-479 error_callback __main__.py
+527 error_callback __main__.py
 > raise error
 
 ---
 
-557 process_update dispatcher.py
-> handler.handle_update(update, self, check, context)
+96 run promise.py
+> self._result = self.pooled_function(*self.args, **self.kwargs)
 
 ---
 
-116 handle_update handlers.py
-> return self.callback(update, context)
+152 chatbot chatbot.py
+> message.reply_text(reply)
 
 ---
 
-286 info userinfo.py
-> mod_info = mod.__user_info__(user.id, chat.id).strip()
+977 reply_text message.py
+> return self.bot.send_message(
 
-TypeError:
-__user_info__() takes 1 positional argument but 2 were given
+---
+
+134 decorator bot.py
+> result = func(*args, **kwargs)
+
+---
+
+534 send_message bot.py
+> return self._message(  # type: ignore[return-value]
+
+---
+
+203 _message extbot.py
+> result = super()._message(
+
+---
+
+344 _message bot.py
+> result = self._post(endpoint, data, timeout=timeout, api_kwargs=api_kwargs)
+
+---
+
+299 _post bot.py
+> return self.request.post(
+
+---
+
+361 post request.py
+> result = self._request_wrapper(
+
+---
+
+279 _request_wrapper request.py
+> raise BadRequest(message)
+
+telegram.error.BadRequest
 
 -------------------------------------------------------------------------------
 An exception was raised while handling an update
 User: 8294062042
 Chat: Nex -1003692127639
 Callback data: None
-Message: /info
+Message: /spell
 
 Full Traceback: Traceback (most recent call last):
-  File "/home/runner/workspace/DazaiRobot/modules/userinfo.py", line 284, in info
-    mod_info = mod.__user_info__(user.id).strip()
-  File "/home/runner/workspace/DazaiRobot/modules/global_bans.py", line 487, in __user_info__
-    if int(user_id) in DRAGONS + TIGERS + WOLVES:
-TypeError: unsupported operand type(s) for +: 'set' and 'set'
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 569, in process_update
-    self.dispatch_error(update, exc)
-  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 813, in dispatch_error
-    callback(update, context)
-  File "/home/runner/workspace/DazaiRobot/__main__.py", line 479, in error_callback
+  File "/home/runner/workspace/DazaiRobot/__main__.py", line 527, in error_callback
     raise error
-  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/dispatcher.py", line 557, in process_update
-    handler.handle_update(update, self, check, context)
-  File "/home/runner/workspace/DazaiRobot/modules/helper_funcs/handlers.py", line 116, in handle_update
-    return self.callback(update, context)
-  File "/home/runner/workspace/DazaiRobot/modules/userinfo.py", line 286, in info
-    mod_info = mod.__user_info__(user.id, chat.id).strip()
-TypeError: __user_info__() takes 1 positional argument but 2 were given
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/utils/promise.py", line 96, in run
+    self._result = self.pooled_function(*self.args, **self.kwargs)
+  File "/home/runner/workspace/DazaiRobot/modules/chatbot.py", line 152, in chatbot
+    message.reply_text(reply)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/message.py", line 977, in reply_text
+    return self.bot.send_message(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/bot.py", line 134, in decorator
+    result = func(*args, **kwargs)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/bot.py", line 534, in send_message
+    return self._message(  # type: ignore[return-value]
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/ext/extbot.py", line 203, in _message
+    result = super()._message(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/bot.py", line 344, in _message
+    result = self._post(endpoint, data, timeout=timeout, api_kwargs=api_kwargs)
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/bot.py", line 299, in _post
+    return self.request.post(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/utils/request.py", line 361, in post
+    result = self._request_wrapper(
+  File "/home/runner/workspace/.pythonlibs/lib/python3.10/site-packages/telegram/utils/request.py", line 279, in _request_wrapper
+    raise BadRequest(message)
+telegram.error.BadRequest: Message to be replied not found

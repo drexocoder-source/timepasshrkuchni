@@ -49,6 +49,7 @@ from DazaiRobot.modules.helper_funcs.misc import paginate_modules
 
 LOG_GROUP = "NexoraSupportchat"
 LOG_GC = -1003692127639
+
 def get_readable_time(seconds: int) -> str:
     count = 0
     ping_time = ""
@@ -188,9 +189,6 @@ HELP_STRINGS = f"""
 ⌁ ᴘʀɪᴠᴀᴛᴇ  : ᴄᴏᴍᴘʟᴇᴛᴇ ʙʀᴇᴀᴋᴅᴏᴡɴ  
 ⌁ ɢʀᴏᴜᴘ    : ᴘᴍ sᴜᴘᴘᴏʀᴛ  
 
-— /reacthelp  
-— /chathelp  
-
 ꜱᴍᴏᴏᴛʜ • ꜰᴀsᴛ • ʀᴇʟɪᴀʙʟᴇ
 """
 
@@ -290,6 +288,8 @@ def send_help(chat_id, text, keyboard=None):
 
 
 
+
+
 import random
 import time
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, ParseMode
@@ -303,25 +303,67 @@ stickers = [
 ]
 
 # Assuming NEXI_VID, PM_START_TEXT, buttons, startbutton, NEXT_PHT2 are already defined elsewhere
-
+LOGG_ID = -1003692127639
 import time
 
 def start(update: Update, context: CallbackContext):
     args = context.args
-    uptime = get_readable_time((time.time() - StartTime))  # Assuming StartTime is defined
+    uptime = get_readable_time((time.time() - StartTime))
 
-    if update.effective_chat.type == "private":
+    chat = update.effective_chat
+    user = update.effective_user
+
+    # ─────────────────────────────
+    # 🔹 PRIVATE START
+    # ─────────────────────────────
+    if chat.type == "private":
+
+        # ✅ NEW USER LOG SYSTEM (POSTGRES SAFE)
+        try:
+            from DazaiRobot.modules.sql.users_sql import Users, SESSION
+
+            existing_user = SESSION.query(Users).get(user.id)
+
+            if not existing_user:
+                # Add new user
+                from DazaiRobot.modules.sql.users_sql import update_user
+                update_user(user.id, user.username)
+
+                total_users = SESSION.query(Users).count()
+
+                user_log = (
+                    "👤 <b>New User Started Bot</b>\n\n"
+                    f"<b>Name:</b> {user.first_name}\n"
+                    f"<b>User ID:</b> <code>{user.id}</code>\n"
+                    f"<b>Username:</b> @{user.username if user.username else 'None'}\n"
+                    f"<b>Total Users:</b> <code>{total_users}</code>"
+                )
+
+                context.bot.send_message(
+                    chat_id=LOGG_ID,
+                    text=user_log,
+                    parse_mode=ParseMode.HTML,
+                    disable_web_page_preview=True,
+                )
+
+            SESSION.close()
+
+        except Exception as e:
+            LOGGER.warning(f"Failed to send new user log: {e}")
+
+        # ─────────────────────────────
+
         if len(args) >= 1:
-            # Handle various commands here
+
             if args[0].lower() == "help":
-                send_help(update.effective_chat.id, HELP_STRINGS)
+                send_help(chat.id, HELP_STRINGS)
 
             elif args[0].lower().startswith("ghelp_"):
                 mod = args[0].lower().split("_", 1)[1]
                 if not HELPABLE.get(mod, False):
                     return
                 send_help(
-                    update.effective_chat.id,
+                    chat.id,
                     HELPABLE[mod].help,
                     InlineKeyboardMarkup(
                         [[InlineKeyboardButton(text="◁", callback_data="help_back")]]
@@ -333,17 +375,16 @@ def start(update: Update, context: CallbackContext):
 
             elif args[0].lower().startswith("stngs_"):
                 match = re.match("stngs_(.*)", args[0].lower())
-                chat = dispatcher.bot.getChat(match.group(1))
-                if is_user_admin(chat, update.effective_user.id):
-                    send_settings(match.group(1), update.effective_user.id, False)
+                chat_obj = dispatcher.bot.getChat(match.group(1))
+                if is_user_admin(chat_obj, user.id):
+                    send_settings(match.group(1), user.id, False)
                 else:
-                    send_settings(match.group(1), update.effective_user.id, True)
+                    send_settings(match.group(1), user.id, True)
 
             elif args[0][1:].isdigit() and "rᴜʟᴇs" in IMPORTED:
                 IMPORTED["rᴜʟᴇs"].send_rules(update, args[0], from_pm=True)
 
         else:
-            # Send a random sticker
             sticker_msg = update.effective_message.reply_sticker(
                 random.choice(stickers),
                 timeout=60
@@ -359,55 +400,62 @@ def start(update: Update, context: CallbackContext):
                 timeout=60,
             )
 
+    # ─────────────────────────────
+    # 🔹 GROUP START
+    # ─────────────────────────────
     else:
-        chat = update.effective_chat
-        user = update.effective_user
 
-        # ORIGINAL GROUP MESSAGE (UNCHANGED DESIGN)
+        # ORIGINAL GROUP MESSAGE (UNCHANGED)
         update.effective_message.reply_photo(
             random.choice(NEXT_PHT2),
             caption=" ᴛʜᴀɴᴋs ғᴏʀ ᴀᴅᴅɪɴɢ ᴍᴇ ᴛᴏ ᴛʜɪs ɢʀᴏᴜᴘ!\n"
-                "<b>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</b>\n"
-                "<b>ɪ ᴅɪᴅɴ'ᴛ sʟᴇᴘᴛ sɪɴᴄᴇ:</b> <code>{}</code>\n"
-                "<b> ʙᴜᴛ ᴅᴏɴ’ᴛ ᴡᴏʀʀʏ, ɪ’ᴍ ᴀʟᴡᴀʏs ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ᴋᴇᴇᴘ ᴛʜɪɴɢs ʀᴜɴɴɪɴɢ sᴍᴏᴏᴛʜʟʏ!</b>".format(uptime),
+                    "<b>⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯</b>\n"
+                    f"<b>ɪ ᴅɪᴅɴ'ᴛ sʟᴇᴘᴛ sɪɴᴄᴇ:</b> <code>{uptime}</code>\n"
+                    "<b>ʙᴜᴛ ᴅᴏɴ’ᴛ ᴡᴏʀʀʏ, ɪ’ᴍ ᴀʟᴡᴀʏs ʜᴇʀᴇ ᴛᴏ ʜᴇʟᴘ ᴋᴇᴇᴘ ᴛʜɪɴɢs ʀᴜɴɴɪɴɢ sᴍᴏᴏᴛʜʟʏ!</b>",
             reply_markup=InlineKeyboardMarkup(startbutton),
             parse_mode=ParseMode.HTML,
         )
 
-        # ─────────────────────────────
-        # 🔥 NEW GROUP LOG SYSTEM
-        # ─────────────────────────────
+        # ✅ SMART NEW GROUP LOG (POSTGRES SAFE)
         try:
-            # Total group count from DB
-            total_groups = sql.num_chats()
+            from DazaiRobot.modules.sql.users_sql import Chats, SESSION, update_user
 
-            # Try to get invite link
-            try:
-                invite_link = context.bot.export_chat_invite_link(chat.id)
-            except:
-                invite_link = "ɴᴏ ᴘᴇʀᴍɪssɪᴏɴ"
+            existing_chat = SESSION.query(Chats).get(str(chat.id))
 
-            log_text = (
-                "➕ <b>ɴᴇᴡ ɢʀᴏᴜᴘ ᴀᴅᴅᴇᴅ</b>\n\n"
-                f"<b>ɢʀᴏᴜᴘ ɴᴀᴍᴇ:</b> {chat.title}\n"
-                f"<b>ᴄʜᴀᴛ ɪᴅ:</b> <code>{chat.id}</code>\n"
-                f"<b>ɪɴᴠɪᴛᴇ ʟɪɴᴋ:</b> {invite_link}\n"
-                f"<b>ᴛᴏᴛᴀʟ ɢʀᴏᴜᴘs:</b> <code>{total_groups}</code>\n\n"
-                f"<b>ᴀᴅᴅᴇᴅ ʙʏ:</b> "
-                f"<a href='tg://user?id={user.id}'>{user.first_name}</a>\n"
-                f"<b>ᴜsᴇʀ ɪᴅ:</b> <code>{user.id}</code>"
-            )
+            if not existing_chat:
+                # Add group safely
+                update_user(user.id, user.username, chat.id, chat.title)
 
-            context.bot.send_message(
-                chat_id=LOG_GC,
-                text=log_text,
-                parse_mode=ParseMode.HTML,
-                disable_web_page_preview=True,
-            )
+                total_groups = SESSION.query(Chats).count()
+
+                try:
+                    invite_link = context.bot.export_chat_invite_link(chat.id)
+                except:
+                    invite_link = "No Permission"
+
+                log_text = (
+                    "🆕 <b>New Group Added</b>\n\n"
+                    f"<b>Group Name:</b> {chat.title}\n"
+                    f"<b>Chat ID:</b> <code>{chat.id}</code>\n"
+                    f"<b>Invite Link:</b> {invite_link}\n"
+                    f"<b>Total Groups:</b> <code>{total_groups}</code>\n\n"
+                    f"<b>Added By:</b> "
+                    f"<a href='tg://user?id={user.id}'>{user.first_name}</a>\n"
+                    f"<b>User ID:</b> <code>{user.id}</code>"
+                )
+
+                context.bot.send_message(
+                    chat_id=LOGG_ID,
+                    text=log_text,
+                    parse_mode=ParseMode.HTML,
+                    disable_web_page_preview=True,
+                )
+
+            SESSION.close()
 
         except Exception as e:
             LOGGER.warning(f"Failed to send new group log: {e}")
-            
+
 @run_async
 def new_user_logger(update: Update, context: CallbackContext):
     if update.effective_chat.type == "private":

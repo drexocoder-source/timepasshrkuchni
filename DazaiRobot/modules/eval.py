@@ -69,50 +69,47 @@ def cleanup_code(code):
 
 def do(func, bot, update):
     log_input(update)
-    content = update.message.text.split(" ", 1)[-1]
-    body = cleanup_code(content)
-    env = namespace_of(update.message.chat_id, update, bot)
 
-    os.chdir(os.getcwd())
-    with open(
-        os.path.join(os.getcwd(), "DazaiRobot/modules/helper_funcs/temp.txt"), "w"
-    ) as temp:
-        temp.write(body)
+    content = update.message.text.split(" ", 1)
+    if len(content) < 2:
+        return "No code provided."
+
+    body = cleanup_code(content[1])
+    env = namespace_of(update.message.chat_id, update, bot)
 
     stdout = io.StringIO()
 
-    to_compile = f'def func():\n{textwrap.indent(body, "  ")}'
+    # Try simple eval first
+    try:
+        result = eval(body, env)
+        return result
+    except SyntaxError:
+        pass
+    except Exception as e:
+        return f"{e.__class__.__name__}: {e}"
+
+    # If not eval-able, treat as exec
+    to_compile = "def __func__():\n" + textwrap.indent(body, "    ")
 
     try:
         exec(to_compile, env)
     except Exception as e:
         return f"{e.__class__.__name__}: {e}"
 
-    func = env["func"]
+    func = env["__func__"]
 
     try:
         with redirect_stdout(stdout):
-            func_return = func()
+            returned = func()
     except Exception:
-        value = stdout.getvalue()
-        return f"{value}{traceback.format_exc()}"
-    else:
-        value = stdout.getvalue()
-        result = None
-        if func_return is None:
-            if value:
-                result = f"{value}"
-            else:
-                try:
-                    result = f"{repr(eval(body, env))}"
-                except:
-                    pass
-        else:
-            result = f"{value}{func_return}"
-        if result:
-            return result
+        return stdout.getvalue() + traceback.format_exc()
 
+    output = stdout.getvalue()
 
+    if returned is not None:
+        return output + str(returned)
+
+    return output or "Done."
 @dev_plus
 def clear(update: Update, context: CallbackContext):
     bot = context.bot

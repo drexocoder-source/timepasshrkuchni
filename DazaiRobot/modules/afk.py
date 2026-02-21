@@ -54,23 +54,29 @@ def no_longer_afk(update: Update, context: CallbackContext):
 
     res = sql.rm_afk(user.id)
     if res:
-        if message.new_chat_members:  # dont say msg
+        if message.new_chat_members:  # dont send msg for joins
             return
-        firstname = update.effective_user.first_name
+
+        firstname = user.first_name
+
         try:
             options = [
-                "{} is here!",
-                "{} is back!",
-                "{} is now in the chat!",
-                "{} is awake!",
-                "{} is back online!",
-                "{} is finally here!",
-                "Welcome back! {}",
-                "Where is {}?\nIn the chat!",
+                f"✨ {firstname} has returned.\nDid you miss them? Of course you did.",
+                f"⚡ Yo {firstname}… back already?\nTry not to disappear again.",
+                f"🕶 {firstname} just stepped back into the spotlight.",
+                f"💫 Guess who's back? Yeah… it’s {firstname}.",
+                f"🔥 {firstname} has re-entered the chat.\nEnergy restored.",
+                f"👀 {firstname} is here.\nThe vibe just improved.",
+                f"🌌 {firstname} woke up from AFK mode.\nAbout time.",
+                f"😌 Relax everyone… {firstname} is back.",
             ]
-            chosen_option = random.choice(options)
-            update.effective_message.reply_text(chosen_option.format(firstname))
-        except:
+
+            update.effective_message.reply_text(
+                random.choice(options),
+                parse_mode=ParseMode.HTML
+            )
+
+        except Exception:
             return
 
 
@@ -126,16 +132,43 @@ def reply_afk(update: Update, context: CallbackContext):
 def check_afk(update, context, user_id, fst_name, userc_id):
     if sql.is_afk(user_id):
         user = sql.check_afk_status(user_id)
+
+        # Don't trigger if user is checking themselves
         if int(userc_id) == int(user_id):
             return
+
+        name = html.escape(fst_name)
+
         if not user.reason:
-            res = "{} is afk".format(fst_name)
-            update.effective_message.reply_text(res)
-        else:
-            res = "{} is afk.\nReason: <code>{}</code>".format(
-                html.escape(fst_name), html.escape(user.reason)
+            options = [
+                f"🕶 {name} dipped into AFK mode.\nProbably doing something cooler than us.",
+                f"🌌 {name} vanished.\nNo worries, they'll reappear dramatically.",
+                f"✨ {name} is currently AFK.\nLet them cook.",
+                f"⚡ {name} stepped out.\nTry again later, champ.",
+                f"💤 {name} activated sleep technique.",
+                f"👀 {name} is AFK.\nPlot twist loading...",
+            ]
+
+            update.effective_message.reply_text(
+                random.choice(options),
+                parse_mode="html"
             )
-            update.effective_message.reply_text(res, parse_mode="html")
+
+        else:
+            reason = html.escape(user.reason)
+
+            options = [
+                f"🕶 {name} is AFK.\nReason:\n<code>{reason}</code>",
+                f"🌌 {name} disappeared for a bit.\nWhy?\n<code>{reason}</code>",
+                f"⚡ {name} stepped away.\nMission:\n<code>{reason}</code>",
+                f"💙 {name} is in AFK dimension.\nDetails:\n<code>{reason}</code>",
+                f"✨ {name} isn’t here right now.\nReason:\n<code>{reason}</code>",
+            ]
+
+            update.effective_message.reply_text(
+                random.choice(options),
+                parse_mode="html"
+            )
 
 
 __help__ = """

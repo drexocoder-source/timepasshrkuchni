@@ -101,16 +101,23 @@ def approved(update, context):
     message = update.effective_message
     chat_title = message.chat.title
     chat = update.effective_chat
+
     msg = "The following users are approved.\n"
     approved_users = sql.list_approved(message.chat_id)
-    for i in approved_users:
-        member = chat.get_member(int(i.user_id))
-        msg += f"- `{i.user_id}`: {member.user['first_name']}\n"
-    if msg.endswith("approved.\n"):
+
+    if not approved_users:
         message.reply_text(f"No users are approved in {chat_title}.")
         return ""
-    else:
-        message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
+
+    for i in approved_users:
+        try:
+            member = chat.get_member(int(i.user_id))
+            msg += f"- `{i.user_id}`: {member.user['first_name']}\n"
+        except BadRequest:
+            # user no longer in chat → clean DB
+            sql.disapprove(message.chat_id, int(i.user_id))
+
+    message.reply_text(msg, parse_mode=ParseMode.MARKDOWN)
 
 
 @user_admin
@@ -118,13 +125,20 @@ def approval(update, context):
     message = update.effective_message
     chat = update.effective_chat
     args = context.args
+
     user_id = extract_user(message, args)
-    member = chat.get_member(int(user_id))
     if not user_id:
         message.reply_text(
             "I don't know who you're talking about, you're going to need to specify a user!"
         )
         return ""
+
+    try:
+        member = chat.get_member(int(user_id))
+    except BadRequest:
+        message.reply_text("I can't find that user in this chat.")
+        return ""
+
     if sql.is_approved(message.chat_id, user_id):
         message.reply_text(
             f"{member.user['first_name']} is an approved user. Locks, antiflood, and blocklists won't apply to them."

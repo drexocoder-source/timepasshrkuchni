@@ -1,40 +1,89 @@
-import requests as r
-from pyrogram.types import InputMediaPhoto
+import asyncio
+import urllib.parse
+from pyrogram import filters
+from pyrogram.types import InputMediaPhoto, Message
+from DazaiRobot import pbot
+import random
+import time
 from pyrogram import filters
 from pyrogram.types import Message
-
 from DazaiRobot import pbot
 
-async def getText(message):
-    """Extract Text From Commands"""
-    text_to_return = message.text
-    if message.text is None:
-        return None
-    if " " in text_to_return:
-        try:
-            return message.text.split(None, 1)[1]
-        except IndexError:
-            return None
-    else:
-        return None
+# ─────────────────────────────
+# 💙 STORAGE
+# ─────────────────────────────
 
-@pbot.on_message(filters.command("images"))
-async def get_images(_, message: Message):
-    query = await getText(message)
-    text = query.replace(" ", "%")
-    response = r.get(f"https://nova-api-seven.vercel.app/api/images?name={text}")
-    image_data = response.json()
-    image_urls = image_data.get("image_urls", [])[:10]
-    ab = await message.reply("Getting Your Images... Wait A Min..")
-    
-    if not image_urls:
-        await ab.edit("No Results Found. Please Try Something Else!")
+WAIFU_DB = {}  
+# {chat_id: {user_id: {"waifu": target_id, "time": timestamp}}}
+
+COOLDOWN = 60 * 60 * 12  # 12 hours
+
+
+# ─────────────────────────────
+# 💙 WAIFU COMMAND
+# ─────────────────────────────
+
+@pbot.on_message(filters.command("waifu") & filters.group)
+async def waifu(_, message: Message):
+
+    chat_id = message.chat.id
+    user_id = message.from_user.id
+    current_time = time.time()
+
+    if chat_id not in WAIFU_DB:
+        WAIFU_DB[chat_id] = {}
+
+    # Check cooldown
+    if user_id in WAIFU_DB[chat_id]:
+        data = WAIFU_DB[chat_id][user_id]
+        if current_time - data["time"] < COOLDOWN:
+            remaining = int(COOLDOWN - (current_time - data["time"]))
+            hours = remaining // 3600
+            minutes = (remaining % 3600) // 60
+
+            waifu_user = await pbot.get_users(data["waifu"])
+
+            return await message.reply_photo(
+                photo=waifu_user.photo.big_file_id if waifu_user.photo else None,
+                caption=(
+                    "ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\n"
+                    f"💍 ʏᴏᴜʀ ᴡᴀɪꜰᴜ ɪs ᴀʟʀᴇᴀᴅʏ ᴄʟᴀɪᴍᴇᴅ!\n"
+                    f"💙 {waifu_user.mention}\n"
+                    f"⏳ ʀᴇsᴇᴛ ɪɴ {hours}ʜ {minutes}ᴍ"
+                )
+            )
+
+    # Fetch group members (recent participants)
+    members = []
+    async for member in pbot.get_chat_members(chat_id):
+        if not member.user.is_bot and member.user.id != user_id:
+            members.append(member.user.id)
+
+    if len(members) < 1:
+        return await message.reply_text("Not enough members to assign waifu.")
+
+    target_id = random.choice(members)
+
+    WAIFU_DB[chat_id][user_id] = {
+        "waifu": target_id,
+        "time": current_time
+    }
+
+    waifu_user = await pbot.get_users(target_id)
+
+    caption = (
+        "ʜᴇʏ, ɪ’ᴍ Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡\n"
+        "㋡ ɪ ʜᴀᴠᴇ ᴄʜᴏsᴇɴ ʏᴏᴜʀ ᴡᴀɪꜰᴜ ғᴏʀ ᴛʜᴇ ɴᴇxᴛ 12 ʜᴏᴜʀs!\n"
+        f"💘 {message.from_user.mention} 💞 {waifu_user.mention}\n"
+        "✨ ʙᴏɴᴅ ᴠᴀʟɪᴅ ғᴏʀ 12 ʜᴏᴜʀs ✨"
+    )
+
+    if waifu_user.photo:
+        await message.reply_photo(
+            photo=waifu_user.photo.big_file_id,
+            caption=caption
+        )
     else:
-        Ok = []
-        for a in image_urls:
-            Ok.append(InputMediaPhoto(a))
-        try:
-            await message.reply_media_group(media=Ok)
-            await ab.delete()
-        except Exception:
-            await ab.edit("Error occurred while sending images. Please try again.")
+        await message.reply_text(caption)
+
+

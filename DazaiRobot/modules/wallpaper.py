@@ -1,34 +1,33 @@
 import random
-
-import requests
+import urllib.parse
 from pyrogram import filters
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-
 from DazaiRobot import pbot
+
 
 @pbot.on_message(filters.command(["wall", "wallpaper"]))
 async def wall(_, message: Message):
+    if len(message.command) < 2:
+        return await message.reply_text("✨ Give me something to search.\nExample: `/wall anime`")
+
+    query = " ".join(message.command[1:])
+    await message.reply_text("🔍 Searching HD wallpaper...")
+
+    # Encode query safely
+    encoded = urllib.parse.quote(query)
+
+    # Unsplash random image source (no API key needed)
+    image_url = f"https://source.unsplash.com/1920x1080/?{encoded}"
+
     try:
-        text = message.text.split(None, 1)[1]
-    except IndexError:
-        text = None
-    if not text:
-        return await message.reply_text("`Please give some query to search.`")
-    m = await message.reply_text("`Searching for wallpapers...`")
-    try:
-        url = requests.get(f"https://api.safone.me/wall?query={text}").json()["results"]
-        ran = random.randint(0, 3)
         await message.reply_photo(
-            photo=url[ran]["imageUrl"],
-            caption=f"🥀 **ʀᴇǫᴜᴇsᴛᴇᴅ ʙʏ :** {message.from_user.mention}",
+            photo=image_url,
+            caption=f"🖼 **Wallpaper for:** `{query}`\n\n🥀 Requested by: {message.from_user.mention}",
             reply_markup=InlineKeyboardMarkup(
                 [
-                    [InlineKeyboardButton("ʟɪɴᴋ", url=url[ran]["imageUrl"])],
+                    [InlineKeyboardButton("🔗 Open Image", url=image_url)]
                 ]
             ),
         )
-        await m.delete()
-    except Exception as e:
-        await m.edit_text(
-            f"`ᴡᴀʟʟᴘᴀᴘᴇʀ ɴᴏᴛ ғᴏᴜɴᴅ ғᴏʀ : `{text}`",
-        )
+    except Exception:
+        await message.reply_text(f"❌ No wallpaper found for `{query}`.")

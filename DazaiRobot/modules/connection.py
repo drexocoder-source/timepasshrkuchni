@@ -92,7 +92,13 @@ def connect_chat(update, context):
     if update.effective_chat.type == "private":
         if args and len(args) >= 1:
             try:
-                connect_chat = int(args[0])
+                try:
+                    connect_chat = int(args[0])
+                    if not str(connect_chat).startswith("-100"):
+                        raise ValueError
+                except ValueError:
+                    send_message(update.effective_message, "Invalid Chat ID!")
+                    return
                 getstatusadmin = context.bot.get_chat_member(
                     connect_chat, update.effective_message.from_user.id
                 )
@@ -258,44 +264,66 @@ def disconnect_chat(update, context):
 def connected(bot: Bot, update: Update, chat, user_id, need_admin=True):
     user = update.effective_user
 
-    if chat.type == chat.PRIVATE and sql.get_connected_chat(user_id):
-        conn_id = sql.get_connected_chat(user_id).chat_id
+    # Only works in PM
+    if chat.type != chat.PRIVATE:
+        return False
+
+    # Get stored connection
+    conn_data = sql.get_connected_chat(user_id)
+    if not conn_data:
+        return False
+
+    conn_id = conn_data.chat_id
+    if not conn_id:
+        return False
+
+    # Ensure valid chat id
+    try:
+        conn_id = int(conn_id)
+    except (ValueError, TypeError):
+        return False
+
+    # Check member status safely
+    try:
         getstatusadmin = bot.get_chat_member(
             conn_id, update.effective_message.from_user.id
         )
-        isadmin = getstatusadmin.status in ("administrator", "creator")
-        ismember = getstatusadmin.status in ("member")
-        isallow = sql.allow_connect_to_chat(conn_id)
-
-        if (
-            (isadmin)
-            or (isallow and ismember)
-            or (user.id in DRAGONS)
-            or (user.id in DEV_USERS)
-        ):
-            if need_admin is True:
-                if (
-                    getstatusadmin.status in ("administrator", "creator")
-                    or user_id in DRAGONS
-                    or user.id in DEV_USERS
-                ):
-                    return conn_id
-                else:
-                    send_message(
-                        update.effective_message,
-                        "You must be an admin in the connected group!",
-                    )
-            else:
-                return conn_id
-        else:
-            send_message(
-                update.effective_message,
-                "The group changed the connection rights or you are no longer an admin.\nI've disconnected you.",
-            )
-            disconnect_chat(update, bot)
-    else:
+    except Exception:
+        # Bot can't access group anymore
+        disconnect_chat(update, None)
         return False
 
+    isadmin = getstatusadmin.status in ("administrator", "creator")
+    ismember = getstatusadmin.status == "member"
+    isallow = sql.allow_connect_to_chat(conn_id)
+
+    # Permission check
+    if (
+        isadmin
+        or (isallow and ismember)
+        or (user.id in DRAGONS)
+        or (user.id in DEV_USERS)
+    ):
+
+        if need_admin:
+            if isadmin or user.id in DRAGONS or user.id in DEV_USERS:
+                return conn_id
+            else:
+                send_message(
+                    update.effective_message,
+                    "You must be an admin in the connected group!",
+                )
+                return False
+        else:
+            return conn_id
+
+    else:
+        send_message(
+            update.effective_message,
+            "The group changed the connection rights or you are no longer an admin.\nI've disconnected you.",
+        )
+        disconnect_chat(update, None)
+        return False
 
 CONN_HELP = """
  *Actions are available with connected groups :*
@@ -332,6 +360,16 @@ def connect_button(update, context):
 
     if connect_match:
         target_chat = connect_match.group(1)
+
+        if not target_chat:
+            query.answer("Invalid chat id!", show_alert=True)
+            return
+
+        try:
+            target_chat = int(target_chat)
+        except ValueError:
+            query.answer("Invalid chat id format!", show_alert=True)
+            return
         getstatusadmin = context.bot.get_chat_member(target_chat, query.from_user.id)
         isadmin = getstatusadmin.status in ("administrator", "creator")
         ismember = getstatusadmin.status in ("member")
@@ -402,7 +440,7 @@ HELP_CONNECT_CHAT_HANDLER = CommandHandler(
     "helpconnect", help_connect_chat, run_async=True
 )
 CONNECT_BTN_HANDLER = CallbackQueryHandler(
-    connect_button, pattern=r"connect", run_async=True
+    connect_button, pattern=r"^connect", run_async=True
 )
 
 dispatcher.add_handler(CONNECT_CHAT_HANDLER)

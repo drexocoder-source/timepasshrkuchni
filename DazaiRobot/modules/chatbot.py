@@ -117,10 +117,18 @@ def dazai_message(context: CallbackContext, message):
         return False
 
 
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://integrate.api.nvidia.com/v1",
+    api_key="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"
+)
+
 def chatbot(update: Update, context: CallbackContext):
     message = update.effective_message
     chat_id = update.effective_chat.id
     bot = context.bot
+
     is_dazai = sql.is_dazai(chat_id)
     if is_dazai:
         return
@@ -128,17 +136,24 @@ def chatbot(update: Update, context: CallbackContext):
     if message.text and not message.document:
         if not dazai_message(context, message):
             return
+
         bot.send_chat_action(chat_id, action="typing")
-        request = requests.get(
-            f"https://api.safone.me/chatbot?query={message.text}&user_id={chat_id}&bot_name=Group_Controller&bot_master=Mukesh"
+
+        response = client.chat.completions.create(
+            model="meta/llama-3.1-8b-instruct",
+            messages=[
+                {"role": "system", "content": "You are a helpful anime style group chatbot."},
+                {"role": "user", "content": message.text}
+            ],
+            max_tokens=200
         )
-        results = json.loads(request.text)
-        sleep(0.5)
-        message.reply_text(results["response"])
+
+        reply = response.choices[0].message.content
+        message.reply_text(reply)
 
 
 __help__ = f"""
-*{BOT_NAME} ʜᴀs ᴀɴ ᴄʜᴀᴛʙᴏᴛ ᴡʜɪᴄʜ ᴘʀᴏᴠɪᴅᴇs ʏᴏᴜ ᴀ sᴇᴇᴍɪɴɢʟᴇss ᴄʜᴀᴛᴛɪɴɢ ᴇxᴘᴇʀɪᴇɴᴄᴇ :**
+**Ꮐᴏᴊᴏ ꕶᴀᴛᴏʀᴜ! ⚡️ ʜᴀs ᴀɴ ᴄʜᴀᴛʙᴏᴛ ᴡʜɪᴄʜ ᴘʀᴏᴠɪᴅᴇs ʏᴏᴜ ᴀ sᴇᴇᴍɪɴɢʟᴇss ᴄʜᴀᴛᴛɪɴɢ ᴇxᴘᴇʀɪᴇɴᴄᴇ :**
 
  »  /ᴄʜᴀᴛʙᴏᴛ *:* sʜᴏᴡs ᴄʜᴀᴛʙᴏᴛ ᴄᴏɴᴛʀᴏʟ ᴘᴀɴᴇʟ
 """
@@ -150,11 +165,11 @@ CHATBOTK_HANDLER = CommandHandler("chatbot", dazai, run_async=True)
 ADD_CHAT_HANDLER = CallbackQueryHandler(dazaiadd, pattern=r"add_chat", run_async=True)
 RM_CHAT_HANDLER = CallbackQueryHandler(dazairm, pattern=r"rm_chat", run_async=True)
 CHATBOT_HANDLER = MessageHandler(
-    Filters.text
-    & (~Filters.regex(r"^#[^\s]+") & ~Filters.regex(r"^!") & ~Filters.regex(r"^\/")),
+    Filters.reply & Filters.text,
     chatbot,
     run_async=True,
 )
+
 
 dispatcher.add_handler(ADD_CHAT_HANDLER)
 dispatcher.add_handler(CHATBOTK_HANDLER)

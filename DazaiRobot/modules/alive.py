@@ -12,14 +12,14 @@ VIDEO  = "https://telegra.ph//file/105564eec605db6af941d.mp4"
 @pbot.on_message(filters.command("alive"))
 async def awake(_, message: Message):
     TEXT = f"**Hᴇʏ Hᴏɴᴇʏ {message.from_user.mention},\n\nɪ ᴀᴍ {BOT_NAME}**\n━━━━━━━━━━━━━━━━━━━━━━\n\n"
-    TEXT += f"» **ᴍʏ ᴅᴇᴠs:** [ᴅᴇᴠs](https://t.me/Mitsuri_Updates/11)\n\n"
+    TEXT += f"» **ᴍʏ ᴅᴇᴠs:** [ᴅᴇᴠs](https://t.me/Nexxxxxo_bots)\n\n"
     TEXT += f"» **ʟɪʙʀᴀʀʏ ᴠᴇʀsɪᴏɴ:** `{telever}` \n\n"
     TEXT += f"» **ᴛᴇʟᴇᴛʜᴏɴ ᴠᴇʀsɪᴏɴ:** `{tlhver}` \n\n"
     TEXT += f"» **ᴘʏʀᴏɢʀᴀᴍ ᴠᴇʀsɪᴏɴ:** `{pyrover}` \n━━━━━━━━━━━━━━━━━━━━━\n\n"
     BUTTON = [
         [
             InlineKeyboardButton("ʜᴇʟᴘ", url=f"https://t.me/{BOT_USERNAME}?start=help"),
-            InlineKeyboardButton("Sᴜᴘᴘᴏʀᴛ", url=f"https://t.me/Ahjin_sprt"),
+            InlineKeyboardButton("Sᴜᴘᴘᴏʀᴛ", url=f"https://t.me/NexoraSupportchat"),
         ]
     ]
     await message.reply_video(

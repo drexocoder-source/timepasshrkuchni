@@ -14,12 +14,9 @@ from DazaiRobot import DEV_USERS, OWNER_ID, pbot as pgram
 from DazaiRobot.modules.sql.users_sql import get_all_users
 
 # get_arg function to retrieve an argument from a message
-def get_arg(message):
-    args = message.text.split(" ")
-    if len(args) > 1:
-        return args[1]
-    else:
-        return None
+def get_broadcast_text(message):
+    parts = message.text.split()
+    return " ".join([p for p in parts[1:] if not p.startswith("-")])
 
 # Broadcast Function
 @pgram.on_message(filters.command("broadcast"))
@@ -27,70 +24,63 @@ async def broadcast_cmd(client: Client, message: Message):
     user_id = message.from_user.id
     texttt = message.text.split(" ")
 
-    if user_id not in [OWNER_ID] + DEV_USERS:
-        await message.reply_text(
-            "You are not authorized to use this command. Only the owner and authorized users can use it."
-        )
-        return
+    ALLOWED_USERS = {OWNER_ID} | DEV_USERS
+
+    if user_id not in ALLOWED_USERS:
+        return await message.reply_text("You are not authorized.")
 
     if len(texttt) < 2:
         return await message.reply_text(
-            "<b>BROADCASTING COMMANDS</b>\n-user : broadcasting all user's DM\n-group : broadcasting all groups\n-all : broadcasting both\nEx: /broadcast-user"
-        )
-
-    if message.reply_to_message is None and not get_arg(message):
-        return await message.reply_text(
-            "<b>Please provide a message or reply to a message</b>"
+            "<b>BROADCASTING COMMANDS</b>\n"
+            "-user : users\n"
+            "-group : groups\n"
+            "-all : both\n"
+            "Reply to a message or use: /broadcast -user hello"
         )
 
     tex = await message.reply_text("<code>Starting global broadcast...</code>")
 
-    usersss = 0
-    chatttt = 0
-    uerror = 0
-    cerror = 0
+    usersss = chatttt = uerror = cerror = 0
     chats = sql.get_all_chats() or []
     users = get_all_users()
 
     if "-all" in texttt:
-        texttt.append("-user")
-        texttt.append("-group")
+        texttt.extend(["-user", "-group"])
 
+    reply_msg = message.reply_to_message
+    text_msg = get_broadcast_text(message)
+
+    if not reply_msg and not text_msg:
+        return await message.reply_text("Reply to a message or give text.")
+
+    # USERS
     if "-user" in texttt:
         for chat in users:
-            if message.reply_to_message:
-                msg = message.reply_to_message
-            else:
-                msg = get_arg(message)
             try:
-                if message.reply_to_message:
-                    aa = await msg.copy(chat.user_id)
+                if reply_msg:
+                    await reply_msg.copy(chat.user_id)
                 else:
-                    aa = await client.send_message(chat.user_id, msg)
-
+                    await client.send_message(chat.user_id, text_msg)
                 usersss += 1
                 await asyncio.sleep(0.3)
             except Exception:
                 uerror += 1
-                await asyncio.sleep(0.3)
+
+    # GROUPS
     if "-group" in texttt:
         for chat in chats:
-            if message.reply_to_message:
-                msg = message.reply_to_message
-            else:
-                msg = get_arg(message)
             try:
-                if message.reply_to_message:
-                    aa = await msg.copy(chat.chat_id)
+                if reply_msg:
+                    await reply_msg.copy(chat.chat_id)
                 else:
-                    aa = await client.send_message(chat.chat_id, msg)
-
+                    await client.send_message(chat.chat_id, text_msg)
                 chatttt += 1
                 await asyncio.sleep(0.3)
             except Exception:
                 cerror += 1
-                await asyncio.sleep(0.3)
 
     await tex.edit_text(
-        f"<b>Message Successfully Sent</b> \nTotal Users: <code>{usersss}</code> \nFailed Users: <code>{uerror}</code> \nTotal GroupChats: <code>{chatttt}</code> \nFailed GroupChats: <code>{cerror}</code>"
+        f"<b>Broadcast Finished</b>\n\n"
+        f"Users: {usersss}\nFailed: {uerror}\n\n"
+        f"Groups: {chatttt}\nFailed: {cerror}"
     )

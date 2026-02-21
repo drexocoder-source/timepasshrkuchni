@@ -572,11 +572,6 @@ Get information about anime, manga or characters from [AniList](anilist.co).
  • `/kaizoku <anime>`*:* search an anime on animekaizoku.com
  • `/kayo <anime>`*:* search an anime on animekayo.com
  • `/airing <anime>`*:* returns anime airing info.
- • `/imdb` <anime/movie name> *:* get IMDb details of the anime or movie
-
-• *Anime Fun:*
- • `/aq` *:* get random anime quotes
-
  """
 
 ANIME_HANDLER = DisableAbleCommandHandler("anime", anime, run_async=True)

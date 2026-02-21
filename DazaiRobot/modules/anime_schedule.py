@@ -1,30 +1,40 @@
-"""
-STATUS: Code is working. ✅
-"""
-
 from pyrogram import filters
 import requests
 from DazaiRobot import pbot
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 @pbot.on_message(filters.command('latest'))
 def schedule(_, message):
-    results = requests.get('https://subsplease.org/api/?f=schedule&h=true&tz=Japan').json()
-    text = None
-    for result in results['schedule']:
+    try:
+        results = requests.get(
+            'https://subsplease.org/api/?f=schedule&h=true&tz=Japan',
+            timeout=10
+        ).json()
+    except Exception:
+        message.reply_text("Failed to fetch schedule. Try again later.")
+        return
+
+    lines = []
+    for result in results.get('schedule', []):
         title = result['title']
         time = result['time']
         aired = bool(result['aired'])
-        title = f"**[{title}](https://subsplease.org/shows/{result['page']})**" if not aired else f"**~~[{title}](https://subsplease.org/shows/{result['page']})~~**"
-        data = f"{title} - **{time}**"
-        
-        if text:
-            text = f"{text}\n{data}"
+        link = f"https://subsplease.org/shows/{result['page']}"
+
+        if aired:
+            title = f"~~[{title}]({link})~~"
         else:
-            text = data
+            title = f"[{title}]({link})"
 
-    message.reply_text(f"**Today's Schedule:**\nTime-Zone: Tokyo (GMT +9)\n\n{text}")
+        lines.append(f"**{title}** - **{time}**")
 
+    text = "\n".join(lines)
+    final = f"**Today's Schedule:**\nTime-Zone: Tokyo (GMT +9)\n\n{text}"
+
+    # Telegram hard limit protection
+    if len(final) > 4000:
+        final = final[:4000] + "\n..."
+
+    message.reply_text(final, disable_web_page_preview=True)
 
 __mod_name__ = "sᴄʜᴇᴅᴜʟᴇ"
 
