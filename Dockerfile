@@ -32,7 +32,7 @@ RUN apt-get update && \
     && rm -rf /var/lib/apt/lists/*
 
 # ─────────────────────────────────────
-# Upgrade pip tools (fix pkg_resources error)
+# Upgrade core python tools (VERY IMPORTANT)
 # ─────────────────────────────────────
 RUN pip install --upgrade pip setuptools wheel
 
@@ -43,15 +43,12 @@ RUN git clone https://github.com/drexocoder-source/timepasshrkuchni /root/DazaiR
 WORKDIR /root/DazaiRobot
 
 # ─────────────────────────────────────
-# Force correct python-telegram-bot version (VERY IMPORTANT)
+# Install ALL requirements properly
 # ─────────────────────────────────────
-RUN pip uninstall -y python-telegram-bot || true
-RUN pip install python-telegram-bot==13.15
+RUN pip install --no-cache-dir -r requirements.txt
 
-# ─────────────────────────────────────
-# Install Remaining Requirements
-# ─────────────────────────────────────
-RUN pip install -r requirements.txt
+# Force correct telegram version AFTER requirements
+RUN pip install --no-cache-dir --upgrade python-telegram-bot==13.15
 
 # ─────────────────────────────────────
 # Start Bot
