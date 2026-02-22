@@ -71,6 +71,7 @@ tg.RegexHandler = CustomRegexHandler
 tg.CommandHandler = CustomCommandHandler
 tg.MessageHandler = CustomMessageHandler
 
+# ───────────── STARTUP ─────────────
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
     loop.run_until_complete(init_async())
@@ -84,9 +85,13 @@ if __name__ == "__main__":
     LOGGER.info("Starting Polling...")
     updater.start_polling(drop_pending_updates=True)
 
-    updater.idle()   # ✅ THIS IS IMPORTANT
-
-    # Shutdown
-    loop.run_until_complete(shutdown_async())
-    pbot.stop()
-    telethn.disconnect()
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        LOGGER.info("Shutting down...")
+    finally:
+        loop.run_until_complete(shutdown_async())
+        pbot.stop()
+        telethn.disconnect()
+        updater.stop()
+        loop.close()
