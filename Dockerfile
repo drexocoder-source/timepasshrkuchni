@@ -1,10 +1,14 @@
-# Use modern slim image (Debian Bookworm)
+# ─────────────────────────────────────
+# Base Image
+# ─────────────────────────────────────
 FROM python:3.10-slim
 
 ENV PIP_NO_CACHE_DIR=1
 ENV PYTHONUNBUFFERED=1
 
-# Install only required system dependencies
+# ─────────────────────────────────────
+# System Dependencies
+# ─────────────────────────────────────
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         git \
@@ -27,18 +31,29 @@ RUN apt-get update && \
         unzip \
     && rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip
+# ─────────────────────────────────────
+# Upgrade pip tools (fix pkg_resources error)
+# ─────────────────────────────────────
 RUN pip install --upgrade pip setuptools wheel
 
-# Clone repo
+# ─────────────────────────────────────
+# Clone Repository
+# ─────────────────────────────────────
 RUN git clone https://github.com/drexocoder-source/timepasshrkuchni /root/DazaiRobot
 WORKDIR /root/DazaiRobot
 
-# Copy config
-COPY ./DazaiRobot/config.py ./DazaiRobot/config.py* /root/DazaiRobot/DazaiRobot/
+# ─────────────────────────────────────
+# Force correct python-telegram-bot version (VERY IMPORTANT)
+# ─────────────────────────────────────
+RUN pip uninstall -y python-telegram-bot || true
+RUN pip install python-telegram-bot==13.15
 
-# Install Python requirements
+# ─────────────────────────────────────
+# Install Remaining Requirements
+# ─────────────────────────────────────
 RUN pip install -r requirements.txt
 
-# Start bot
+# ─────────────────────────────────────
+# Start Bot
+# ─────────────────────────────────────
 CMD ["python", "-m", "DazaiRobot"]
