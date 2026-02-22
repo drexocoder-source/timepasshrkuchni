@@ -6,13 +6,12 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Install required system packages only
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
     curl \
     ffmpeg \
     gcc \
-    supervisor \
     libpq-dev \
     libssl-dev \
     libffi-dev \
@@ -21,20 +20,20 @@ RUN apt-get update && apt-get install -y \
     sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy full project (instead of cloning)
+# Copy project files
 COPY . /app
 
 # Upgrade pip
 RUN pip install --upgrade pip setuptools wheel
 
-# Install dependencies (Flask should be inside requirements.txt)
+# Install Python dependencies
 RUN pip install -r requirements.txt
 
-# Expose web port
-EXPOSE 8000
+# Make start script executable
+RUN chmod +x start.sh
 
-# Start supervisor
-CMD ["/usr/bin/supervisord"]
-EXPOSE 8000
+# Expose Render port
+EXPOSE 10000
 
-CMD ["/usr/bin/supervisord"]
+# Start both bot + flask
+CMD ["./start.sh"]
